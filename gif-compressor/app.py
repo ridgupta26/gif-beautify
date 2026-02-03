@@ -60,19 +60,37 @@ def upload_file():
         # Get original file size
         original_size = os.path.getsize(input_path)
         
-        # Download background image if URL provided
+        # Handle background image - either local static file or external URL
         background_image_path = None
         if background_type == 'image' and background_image_url and add_background:
-            try:
-                response = requests.get(background_image_url, timeout=10)
-                if response.status_code == 200:
+            # Check if it's a local static file (starts with /static/)
+            if background_image_url.startswith('/static/'):
+                # It's a local file - construct the path
+                local_filename = background_image_url.replace('/static/', '')
+                static_file_path = os.path.join(os.path.dirname(__file__), 'static', local_filename)
+                
+                if os.path.exists(static_file_path):
+                    # Copy to temp directory so we can use it
                     background_image_path = os.path.join(app.config['UPLOAD_FOLDER'], f"{timestamp}_bg.jpg")
-                    with open(background_image_path, 'wb') as f:
-                        f.write(response.content)
-            except Exception as e:
-                print(f"Failed to download background image: {e}")
-                # Fall back to gradient
-                background_type = 'gradient'
+                    import shutil
+                    shutil.copy2(static_file_path, background_image_path)
+                    print(f"Using local wallpaper: {local_filename}")
+                else:
+                    print(f"Local wallpaper not found: {static_file_path}")
+                    background_type = 'gradient'
+            else:
+                # It's an external URL - download it
+                try:
+                    response = requests.get(background_image_url, timeout=10)
+                    if response.status_code == 200:
+                        background_image_path = os.path.join(app.config['UPLOAD_FOLDER'], f"{timestamp}_bg.jpg")
+                        with open(background_image_path, 'wb') as f:
+                            f.write(response.content)
+                        print(f"Downloaded external wallpaper: {background_image_url}")
+                except Exception as e:
+                    print(f"Failed to download background image: {e}")
+                    # Fall back to gradient
+                    background_type = 'gradient'
         
         # Process the GIF
         result = process_gif(

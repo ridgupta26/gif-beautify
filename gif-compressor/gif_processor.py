@@ -35,8 +35,8 @@ def create_gradient_background(width, height, start_color, end_color):
         color = interpolate_color(start_rgb, end_rgb, factor)
         pixels[0, y] = color + (255,)
     
-    # Scale it horizontally - much faster than drawing each pixel!
-    return gradient_strip.resize((width, height), Image.Resampling.NEAREST)
+    # Scale it horizontally with LANCZOS for smooth gradients
+    return gradient_strip.resize((width, height), Image.Resampling.LANCZOS)
 
 def add_rounded_corners(img, radius):
     """Add rounded corners to an image"""
