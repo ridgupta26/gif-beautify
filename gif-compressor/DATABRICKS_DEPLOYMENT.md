@@ -1,28 +1,30 @@
-# 🚀 Databricks App Deployment Guide
+# 🚀 Databricks App Deployment Guide - E2Dogfood Workspace
 
-This guide will help you deploy the GIF Beautifier as a Databricks App.
+This guide will help you deploy the GIF Beautifier as a Databricks App on the E2Dogfood workspace.
 
 ## Prerequisites
 
-- Databricks workspace access
+- Databricks workspace access (E2Dogfood)
 - Databricks CLI installed
 - Valid Databricks authentication
 
 ---
 
-## Step 1: Authenticate with Databricks
+## Step 1: Authenticate with E2Dogfood Workspace
 
-Run this command to authenticate:
-
-```bash
-databricks auth login --profile pm-ai-bootcamp
-```
-
-Or if you want to use a different profile:
+Run this command to authenticate with E2Dogfood:
 
 ```bash
-databricks auth login --host <your-databricks-workspace-url>
+databricks auth login --host https://e2-dogfood.staging.cloud.databricks.com --profile e2dogfood
 ```
+
+Or if your workspace URL is different, use:
+
+```bash
+databricks auth login --profile e2dogfood
+```
+
+The browser will open for you to complete authentication.
 
 ---
 
@@ -32,24 +34,28 @@ Once authenticated, sync the project to your Databricks workspace:
 
 ```bash
 cd /Users/ridhima.gupta/gif-compressor
-databricks sync . /Workspace/Users/ridhima.gupta@databricks.com/gif-beautify --profile pm-ai-bootcamp --full
+databricks sync . /Workspace/Users/ridhima.gupta@databricks.com/gif-beautify --profile e2dogfood --full
 ```
 
 ---
 
-## Step 3: Create the Databricks App
+## Step 3: Enable Watch Mode (Continuous Sync)
 
-### Option A: Using Databricks CLI
+To automatically sync changes as you develop:
 
 ```bash
-databricks apps create gif-beautify \
-  --source-code-path /Workspace/Users/ridhima.gupta@databricks.com/gif-beautify \
-  --profile pm-ai-bootcamp
+databricks sync --watch . /Workspace/Users/ridhima.gupta@databricks.com/gif-beautify --profile e2dogfood
 ```
 
-### Option B: Using Databricks Workspace UI
+Leave this running in a separate terminal while you work!
 
-1. Go to your Databricks workspace
+---
+
+## Step 4: Create the Databricks App
+
+### Option A: Using Databricks Workspace UI (Recommended)
+
+1. Go to your E2Dogfood Databricks workspace
 2. Navigate to **Apps** in the left sidebar
 3. Click **Create App**
 4. Configure:
@@ -58,14 +64,12 @@ databricks apps create gif-beautify \
    - **Command**: `python app.py` (automatically read from `app.yaml`)
 5. Click **Create**
 
----
-
-## Step 4: Watch and Sync Changes (Optional)
-
-To automatically sync changes as you develop:
+### Option B: Using Databricks CLI
 
 ```bash
-databricks sync --watch . /Workspace/Users/ridhima.gupta@databricks.com/gif-beautify --profile pm-ai-bootcamp
+databricks apps create gif-beautify \
+  --source-code-path /Workspace/Users/ridhima.gupta@databricks.com/gif-beautify \
+  --profile e2dogfood
 ```
 
 ---
@@ -101,10 +105,37 @@ if __name__ == '__main__':
 Once deployed, you can access your app at:
 
 ```
-https://<your-workspace>.cloud.databricks.com/apps/gif-beautify
+https://e2-dogfood.staging.cloud.databricks.com/apps/gif-beautify
 ```
 
 Or check the **Apps** section in your Databricks workspace for the exact URL.
+
+---
+
+## Quick Command Reference - E2Dogfood
+
+```bash
+# Authenticate
+databricks auth login --host https://e2-dogfood.staging.cloud.databricks.com --profile e2dogfood
+
+# Full sync
+databricks sync . /Workspace/Users/ridhima.gupta@databricks.com/gif-beautify --profile e2dogfood --full
+
+# Watch mode (continuous sync)
+databricks sync --watch . /Workspace/Users/ridhima.gupta@databricks.com/gif-beautify --profile e2dogfood
+
+# Create app
+databricks apps create gif-beautify --source-code-path /Workspace/Users/ridhima.gupta@databricks.com/gif-beautify --profile e2dogfood
+
+# List apps
+databricks apps list --profile e2dogfood
+
+# View app details
+databricks apps get gif-beautify --profile e2dogfood
+
+# View app logs
+databricks apps logs gif-beautify --profile e2dogfood
+```
 
 ---
 
@@ -115,7 +146,7 @@ Or check the **Apps** section in your Databricks workspace for the exact URL.
 If you see authentication errors:
 
 ```bash
-databricks auth login --profile pm-ai-bootcamp
+databricks auth login --host https://e2-dogfood.staging.cloud.databricks.com --profile e2dogfood
 ```
 
 ### Sync Issues
@@ -123,12 +154,12 @@ databricks auth login --profile pm-ai-bootcamp
 If files aren't syncing:
 
 1. Check your `.gitignore` - make sure important files aren't excluded
-2. Try a full sync: `databricks sync . <path> --full`
+2. Try a full sync: `databricks sync . <path> --full --profile e2dogfood`
 3. Check file permissions
 
 ### App Not Starting
 
-1. Check the app logs in Databricks workspace
+1. Check the app logs: `databricks apps logs gif-beautify --profile e2dogfood`
 2. Verify `requirements.txt` includes all dependencies:
    ```
    Flask==3.0.0
@@ -148,7 +179,7 @@ Databricks Apps automatically assign a port via the `PORT` environment variable.
 If CLI doesn't work, you can manually deploy:
 
 1. **Upload files to Databricks**:
-   - Go to Workspace → Users → your-email
+   - Go to Workspace → Users → ridhima.gupta@databricks.com
    - Create folder: `gif-beautify`
    - Upload all files via UI
 
@@ -159,30 +190,6 @@ If CLI doesn't work, you can manually deploy:
 
 ---
 
-## Quick Command Reference
-
-```bash
-# Authenticate
-databricks auth login --profile pm-ai-bootcamp
-
-# Full sync
-databricks sync . /Workspace/Users/ridhima.gupta@databricks.com/gif-beautify --profile pm-ai-bootcamp --full
-
-# Watch mode (continuous sync)
-databricks sync --watch . /Workspace/Users/ridhima.gupta@databricks.com/gif-beautify --profile pm-ai-bootcamp
-
-# Create app
-databricks apps create gif-beautify --source-code-path /Workspace/Users/ridhima.gupta@databricks.com/gif-beautify --profile pm-ai-bootcamp
-
-# List apps
-databricks apps list --profile pm-ai-bootcamp
-
-# View app details
-databricks apps get gif-beautify --profile pm-ai-bootcamp
-```
-
----
-
 ## Next Steps
 
 After deployment:
@@ -190,7 +197,7 @@ After deployment:
 1. ✅ Test the app with a sample GIF
 2. ✅ Share the app URL with your team
 3. ✅ Monitor app logs for any issues
-4. ✅ Update GitHub repo with deployment instructions
+4. ✅ Update GitHub repo with deployment URL
 
 ---
 
@@ -202,5 +209,4 @@ For more information:
 
 ---
 
-**Made with ❤️ for beautiful GIFs on Databricks!**
-
+**Made with ❤️ for beautiful GIFs on Databricks E2Dogfood!**
