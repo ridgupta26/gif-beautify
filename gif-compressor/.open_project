@@ -1,0 +1,4 @@
+#!/bin/bash
+# Quick launcher for GIF Compressor project
+open /Users/ridhima.gupta/gif-compressor/
+cat /Users/ridhima.gupta/gif-compressor/PROJECT_SUMMARY.md
