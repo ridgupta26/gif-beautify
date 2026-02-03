@@ -180,10 +180,11 @@ def process_gif(input_path, output_path, target_size_mb=5.0, target_width=1900,
             scaled_width = int(target_width * scale_factor)
             scaled_height = int(target_height * scale_factor)
             
-            # Calculate canvas size - add padding for offset OR background
-            if add_background or offset_x != 0 or offset_y != 0:
-                canvas_width = scaled_width + abs(offset_x) * 2
-                canvas_height = scaled_height + abs(offset_y) * 2
+            # Calculate canvas size - add padding around the GIF (centered)
+            if add_background:
+                # Add padding on all sides (offset_x and offset_y represent padding, not offset)
+                canvas_width = scaled_width + offset_x * 2
+                canvas_height = scaled_height + offset_y * 2
             else:
                 canvas_width = scaled_width
                 canvas_height = scaled_height
@@ -212,23 +213,29 @@ def process_gif(input_path, output_path, target_size_mb=5.0, target_width=1900,
             shadow_canvas_height = canvas_height
             shadow_background_template = None
             shadow_blur = 0  # Store blur for use in frame loop
+            shadow_offset_x = 0
+            shadow_offset_y = 0
             
-            if shadow_size and shadow_size != '0':
+            if shadow_size and shadow_size != '0' and shadow_size != 'none':
                 shadow_params = {
                     'small': {'offset': (4, 4), 'blur': 8},
                     'medium': {'offset': (8, 8), 'blur': 20},
                     'large': {'offset': (12, 12), 'blur': 30}
                 }
                 params = shadow_params.get(shadow_size, shadow_params['medium'])
-                offset_s_x, offset_s_y = params['offset']
+                shadow_offset_x, shadow_offset_y = params['offset']
                 shadow_blur = params['blur']
                 
-                # Adjust canvas for shadow
-                shadow_canvas_width = canvas_width + abs(offset_s_x) + shadow_blur * 2
-                shadow_canvas_height = canvas_height + abs(offset_s_y) + shadow_blur * 2
+                # Shadow expands the GIF size
+                gif_with_shadow_width = scaled_width + abs(shadow_offset_x) + shadow_blur * 2
+                gif_with_shadow_height = scaled_height + abs(shadow_offset_y) + shadow_blur * 2
                 
-                # Create shadow background template ONCE
-                if add_background and background_template:
+                # If we have background with padding, expand canvas to fit GIF+shadow+padding
+                if add_background:
+                    shadow_canvas_width = gif_with_shadow_width + offset_x * 2
+                    shadow_canvas_height = gif_with_shadow_height + offset_y * 2
+                    
+                    # Create background template for shadow
                     if background_image_path:
                         try:
                             bg_img = Image.open(background_image_path)
@@ -277,19 +284,21 @@ def process_gif(input_path, output_path, target_size_mb=5.0, target_width=1900,
                     if shadow_size and shadow_size != '0':
                         frame_rgba = create_shadow(frame_rgba, shadow_size)
                     
-                    # Add background with gradient and offset
+                    # Add background with gradient and padding (centers the GIF)
                     if shadow_background_template:
                         # Use pre-calculated shadow background
                         background = shadow_background_template.copy()
-                        paste_x = shadow_blur if shadow_size and shadow_size != '0' else 0
-                        paste_y = shadow_blur if shadow_size and shadow_size != '0' else 0
+                        # Center the GIF+shadow on the background with padding
+                        paste_x = offset_x
+                        paste_y = offset_y
                         background.paste(frame_rgba, (paste_x, paste_y), frame_rgba)
                         frame_rgba = background
                     elif background_template:
-                        # Use regular background
+                        # Use regular background - center the GIF with padding
                         background = background_template.copy()
-                        paste_x = abs(offset_x) if offset_x != 0 else 0
-                        paste_y = abs(offset_y) if offset_y != 0 else 0
+                        # Padding positions the GIF with equal space on all sides
+                        paste_x = offset_x
+                        paste_y = offset_y
                         background.paste(frame_rgba, (paste_x, paste_y), frame_rgba)
                         frame_rgba = background
                     
