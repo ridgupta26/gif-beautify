@@ -302,8 +302,8 @@ def process_gif(input_path, output_path, target_size_mb=5.0, target_width=1900,
                         background.paste(frame_rgba, (paste_x, paste_y), frame_rgba)
                         frame_rgba = background
                     
-                    # OPTIMIZATION: Convert to P mode with adaptive palette (faster than quantize)
-                    frame_p = frame_rgba.convert('P', palette=Image.ADAPTIVE, colors=colors)
+                    # OPTIMIZATION: Convert to P mode with adaptive palette and dithering for smooth gradients
+                    frame_p = frame_rgba.convert('P', palette=Image.ADAPTIVE, colors=colors, dither=Image.FLOYDSTEINBERG)
                     frames.append(frame_p)
                     
                     # Preserve timing

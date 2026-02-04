@@ -775,11 +775,25 @@ function handleNewFile() {
     fileInput.value = '';
     preview.src = '';
     preview.style.display = 'none';
+    preview.style.boxShadow = 'none';
+    preview.style.borderRadius = '0';
     emptyPreview.style.display = 'flex';
     fileInfo.innerHTML = '<span style="color: var(--text-secondary);">No file selected</span>';
     fileCount.textContent = '0';
     renderFileList(); // Show empty state
     compressBtnText.textContent = 'Export GIF(s)';
+    
+    // Clear preview wrapper styling
+    const previewWrapper = document.getElementById('previewWrapper');
+    const previewContainer = document.getElementById('previewContainer');
+    if (previewWrapper) {
+        previewWrapper.style.background = 'transparent';
+        previewWrapper.style.padding = '0';
+        previewWrapper.style.backgroundSize = 'auto';
+    }
+    if (previewContainer) {
+        previewContainer.style.background = '#1a1a1a';
+    }
     
     // Show header compress button again
     compressBtn.style.display = 'inline-flex';
