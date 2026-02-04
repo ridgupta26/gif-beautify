@@ -281,7 +281,7 @@ def process_gif(input_path, output_path, target_size_mb=5.0, target_width=1900,
                         frame_rgba = output
                     
                     # Add shadow effect (before background)
-                    if shadow_size and shadow_size != '0':
+                    if shadow_size and shadow_size != '0' and shadow_size != 'none':
                         frame_rgba = create_shadow(frame_rgba, shadow_size)
                     
                     # Add background with gradient and padding (centers the GIF)
