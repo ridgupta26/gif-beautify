@@ -60,18 +60,29 @@ def upload_file():
         # Get original file size
         original_size = os.path.getsize(input_path)
         
-        # Download background image if URL provided
+        # Resolve background image path
         background_image_path = None
+        temp_background = False
         if background_type == 'image' and background_image_url and add_background:
             try:
-                response = requests.get(background_image_url, timeout=10)
-                if response.status_code == 200:
-                    background_image_path = os.path.join(app.config['UPLOAD_FOLDER'], f"{timestamp}_bg.jpg")
-                    with open(background_image_path, 'wb') as f:
-                        f.write(response.content)
+                if background_image_url.startswith('/static/'):
+                    local_path = os.path.join(app.root_path, background_image_url.lstrip('/'))
+                    if os.path.exists(local_path):
+                        background_image_path = local_path
+                    else:
+                        print(f"Background image not found at: {local_path}")
+                        background_type = 'gradient'
+                else:
+                    response = requests.get(background_image_url, timeout=10)
+                    if response.status_code == 200:
+                        background_image_path = os.path.join(app.config['UPLOAD_FOLDER'], f"{timestamp}_bg.jpg")
+                        with open(background_image_path, 'wb') as f:
+                            f.write(response.content)
+                        temp_background = True
+                    else:
+                        background_type = 'gradient'
             except Exception as e:
-                print(f"Failed to download background image: {e}")
-                # Fall back to gradient
+                print(f"Failed to load background image: {e}")
                 background_type = 'gradient'
         
         # Process the GIF
@@ -90,9 +101,9 @@ def upload_file():
             add_background=add_background
         )
         
-        # Clean up input file and background image
+        # Clean up input file and temp background image (not local static files)
         os.remove(input_path)
-        if background_image_path and os.path.exists(background_image_path):
+        if temp_background and background_image_path and os.path.exists(background_image_path):
             os.remove(background_image_path)
         
         if result['success']:

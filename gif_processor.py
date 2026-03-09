@@ -277,17 +277,15 @@ def process_gif(input_path, output_path, target_size_mb=5.0, target_width=1900,
                     
                     # Add background with gradient and offset
                     if shadow_background_template:
-                        # Use pre-calculated shadow background
                         background = shadow_background_template.copy()
-                        paste_x = shadow_blur if shadow_size and shadow_size != '0' else 0
-                        paste_y = shadow_blur if shadow_size and shadow_size != '0' else 0
+                        paste_x = (background.width - frame_rgba.width) // 2
+                        paste_y = (background.height - frame_rgba.height) // 2
                         background.paste(frame_rgba, (paste_x, paste_y), frame_rgba)
                         frame_rgba = background
                     elif background_template:
-                        # Use regular background
                         background = background_template.copy()
-                        paste_x = abs(offset_x) if offset_x != 0 else 0
-                        paste_y = abs(offset_y) if offset_y != 0 else 0
+                        paste_x = (background.width - frame_rgba.width) // 2
+                        paste_y = (background.height - frame_rgba.height) // 2
                         background.paste(frame_rgba, (paste_x, paste_y), frame_rgba)
                         frame_rgba = background
                     
